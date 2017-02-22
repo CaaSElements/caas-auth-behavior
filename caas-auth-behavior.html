@@ -1,0 +1,36 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`caas-auth-behavior`
+Polymer Authentication Behavior for Crowdfunding as a Service Solutions
+-->
+
+<script>
+  CaasAuthBehavior = {
+
+    properties: {
+
+        /**
+        * Exposes the access token (JSON web token) associated with the current session
+        */
+        accessToken: {
+          type: String,
+          value: null,
+          notify: true,
+        },
+
+        _authHeader: {
+          type: Object,
+          computed: '_computeAuthHeader(accessToken)'
+        }
+
+    },
+
+    _computeAuthHeader: function(accessToken) {
+      return {
+        'authorization': 'Bearer ' + accessToken
+      }
+    }
+
+  }
+</script>
