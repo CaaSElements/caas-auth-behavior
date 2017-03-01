@@ -33,9 +33,12 @@ Polymer Authentication Behavior for Crowdfunding as a Service Solutions
 
     },
 
+    created: function() {
+      document.addEventListener('iron-signal', this._handleIronSignals.bind(this))
+    },
+
     listeners: {
-      'iron-signal-caas-signed-in': '_setAccessToken',
-      'iron-signal-caas-signed-out': '_unsetAccessToken'
+      'iron-signal': '_handleIronSignals'
     },
 
     _computeAuthHeader: function(accessToken) {
@@ -43,20 +46,25 @@ Polymer Authentication Behavior for Crowdfunding as a Service Solutions
         'authorization': 'Bearer ' + accessToken
       }
     },
-
-    _setAccessToken: function(evt, data) {
-      this.accessToken = data.accessToken;
-    },
-
-    _unsetAccessToken: function(evt, data) {
-      this.accessToken = null;
-    },
-
+    
     _computeTokenData: function(accessToken) {
       if(!accessToken) return { data:{} };
       var base64Url = accessToken.split('.')[1];
       var base64 = base64Url.replace('-', '+').replace('_', '/');
       return JSON.parse(window.atob(base64));
+    },
+
+    _handleIronSignals: function(evt) {
+      switch(evt.detail.name) {
+        case 'caas-signed-in':
+          this.accessToken = evt.detail.data.accessToken;
+          break;
+        case 'caas-signed-out':
+          this.accessToken = null;
+          break;
+        default:
+          break;
+      }
     }
 
   }
