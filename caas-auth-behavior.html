@@ -41,10 +41,6 @@ Polymer Authentication Behavior for Crowdfunding as a Service Solutions
       this.fire('iron-signal', {name: 'request-caas-access-token'});
     },
 
-    listeners: {
-      'iron-signal': '_handleIronSignals'
-    },
-
     _computeAuthHeader: function(accessToken) {
       return {
         'authorization': 'Bearer ' + accessToken
