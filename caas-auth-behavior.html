@@ -57,7 +57,7 @@ Polymer Authentication Behavior for Crowdfunding as a Service Solutions
     _handleIronSignals: function(evt) {
       switch(evt.detail.name) {
         case 'caas-access-token':
-          this.accessToken = evt.detail.data.accessToken;
+          this.set('accessToken', evt.detail.data.accessToken);
           break;
         default:
           break;
