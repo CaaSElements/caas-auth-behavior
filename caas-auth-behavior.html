@@ -20,19 +20,38 @@ Polymer Authentication Behavior for Crowdfunding as a Service Solutions
 				value: null,
 				notify: true
 			},
+			assignedRoles: {
+				type: Array,
+				notify: true
+			},
+
+			roleDescriptions: {
+				type: Array,
+				notify: true
+			},
 
 			_authHeader: {
 				type: Object,
-				computed: '_computeAuthHeader(accessToken)'
 			},
 
 			_tokenData: {
 				type: Object,
-				value: { data: {} },
-				computed: '_computeTokenData(accessToken)'
+				value: { data: {} }
+			},
+			_investorAuthHeader: {
+				type: Object,
+				value: false
+			},
+			_entrepreneurAuthHeader: {
+				type: Object,
+				value: false
 			}
-
 		},
+
+		observers: [
+			'setTokenData(accessToken, assignedRoles, roleDescriptions)',
+			'setAuthHeaders(accessToken, roleDescriptions)'
+		],
 
 		created: function () {
 			document.addEventListener('iron-signal', this._handleIronSignals.bind(this))
@@ -42,27 +61,36 @@ Polymer Authentication Behavior for Crowdfunding as a Service Solutions
 			this.fire('iron-signal', { name: 'request-caas-access-token' });
 		},
 
-		_computeAuthHeader: function (accessToken) {
-			return {
-				'authorization': 'Bearer ' + accessToken
-			}
-		},
+		setAuthHeaders(accessToken, roleDescriptions) {
+			var self = this;
+			if (roleDescriptions) {
+				roleDescriptions.forEach(function(roleDescription) {
+					if (roleDescription.name == 'investor') self.set('_investorAuthHeader', {'authorization': 'Bearer ' + accessToken, 'activeRole': roleDescription.name})
+					if (roleDescription.name == 'entrepreneur') self.set('_entrepreneurAuthHeader', {'authorization': 'Bearer ' + accessToken, 'activeRole': roleDescription.name})
+				});
 
-		_computeTokenData: function (accessToken) {
-			if (!accessToken) return { data: {} };
-			var base64Url = accessToken.split('.')[1];
-			var base64 = base64Url.replace('-', '+').replace('_', '/');
-			return JSON.parse(window.atob(base64));
+			}
 		},
 
 		_handleIronSignals: function (evt) {
 			switch (evt.detail.name) {
 				case 'caas-access-token':
 					this.set('accessToken', evt.detail.data.accessToken);
+					this.set('assignedRoles', evt.detail.data.assignedRoles);
+					this.set('roleDescriptions', evt.detail.data.roleDescriptions);
 					break;
 				default:
 					break;
 			}
+		},
+
+		setTokenData(accessToken, assignedRoles, roleDescriptions) {
+			if (!accessToken) return this.set('_tokenData', { data: {} });
+			var base64Url = accessToken.split('.')[1];
+			var base64 = base64Url.replace('-', '+').replace('_', '/');
+			var tokenData = JSON.parse(window.atob(base64));
+			Object.assign(tokenData.data, {assignedRoles: assignedRoles}, {roleDescriptions: roleDescriptions});
+			return this.set('_tokenData', tokenData);
 		}
 
 	}
